@@ -9,6 +9,8 @@ class BIRD():
         self.y = 400
         self.gravity = 0.25  # zwieksza predkosc spadania ptaka w dol
         self.bird_movement = 0
+        self.go_var = 5
+        self.jump = 12
 
     def create_bird(self):
         self.bird = pygame.image.load(
@@ -18,8 +20,8 @@ class BIRD():
 
     def jump_bird(self):
         self.bird_movement = 0  # zeruje wektor w dol
-        self.bird_movement -= 12
+        self.bird_movement -= self.jump
 
     def fall_bird(self):
         self.bird_movement += self.gravity  # przyspiesza spadanie
-        self.y += self.bird_movement + 5
+        self.y += self.bird_movement + self.go_var

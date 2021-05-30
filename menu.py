@@ -131,7 +131,6 @@ class ControlMenu(Menu):
             if self.game.BACK_KEY:
                 self.game.current_menu = self.game.main_menu
                 self.run_display = False
-            # self.check_input()  # sprawdza ktora opcja zostala wybrana
             self.game.display.fill((0, 0, 0))
             # --------------------------menu
             self.game.draw_text('To navigate in Menu', 50,

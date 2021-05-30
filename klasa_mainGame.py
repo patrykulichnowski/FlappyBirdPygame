@@ -2,6 +2,7 @@ from klasa_bird import BIRD
 from klasa_wall import WALL
 from menu import MainMenu
 from menu import ControlMenu
+from os import path
 import pygame
 import sys
 
@@ -12,12 +13,13 @@ class MAIN_GAME():
 
     def __init__(self):
         self.new_game()
+        self.font_name = 'inne/NewTegomin-Regular.ttf'
         self.screen = pygame.display.set_mode((600, 800))
-        self.game_font = pygame.font.Font(None, 25)
+        self.game_font = pygame.font.Font(self.font_name, 25)
         self.clock = pygame.time.Clock()
+        self.wall_go_var = 4
         # ----do MAIN menu
         self.play_sound = True
-        self.font_name = 'NewTegomin-Regular.ttf'
         self.display = pygame.Surface((600, 800))
         self.running = True  # dzialanie programu
         self.playing = False  # granie
@@ -26,6 +28,9 @@ class MAIN_GAME():
         self.main_menu = MainMenu(self)
         self.controls_menu = ControlMenu(self)
         self.current_menu = self.main_menu  # aktualnie wybrane menu
+        # do wyniku
+        self.HS_FILE = "highscore.txt"
+        self.load_data()
 
     def auto_draw_walls(self, x):
         wall = x
@@ -62,8 +67,8 @@ class MAIN_GAME():
         if self.bird.y-30 <= 0 or self.bird.y + 30 >= 800:
             if self.play_sound == True:
                 self.game_over_sound.play()
-            self.new_game()
-            # self.game_over
+            # self.new_game()
+            self.game_over()
         # sprawdza kolizje ze scianami
         self.check_points(self.wall)
         self.check_points(self.wall2)
@@ -74,13 +79,17 @@ class MAIN_GAME():
             if self.bird.y - 30 <= wall.height_up or self.bird.y + 30 >= 800 - wall.height_down:
                 if self.play_sound == True:
                     self.game_over_sound.play()
-                self.new_game()
-                # self.game_over
+                # self.new_game()
+                self.game_over()
             elif self.bird.x - 30 >= wall.movement + wall.width:
                 if self.play_sound == True:
                     self.sound.play()
             else:
                 self.points += 1
+                if int(self.points/25) > self.high_score:
+                    self.high_score = int(self.points/25)
+                    with open(path.join(self.dir, self.HS_FILE), 'w') as f:
+                        f.write(str(int(self.points/25)))
 
     def create_elements(self):
         self.bird.create_bird()
@@ -129,24 +138,55 @@ class MAIN_GAME():
         elif typ == 'left':
             text_rect.topleft = (x, y)
         self.display.blit(text_surface, text_rect)
+        self.screen.blit(text_surface, text_rect)
 
-    def game_over(self):  # ----------do napisania od 0 bo tu kurwa nic nie działa
-        self.playing = False
-        # self.draw_elements()
-        # for event in pygame.event.get():
-        #    if event.type == pygame.KEYDOWN:
-        #        self.playing = True
+    def game_over(self):
+        # self.playing = False
+        self.bird.go_var = 0
+        self.bird.bird_movement = 0
+        self.bird.gravity = 0
+        self.wall_go_var = 0
+        self.bird.jump = 0
+        self.play_sound = False
+        self.go_bg = pygame.Surface((300, 200))
+        self.go_bg.fill((137, 0, 255))
+        self.go_bg_rect = self.go_bg.get_rect(center=(300, 425))
+        self.screen.blit(self.go_bg, self.go_bg_rect)
+        self.draw_text("Points: "+str(int(self.points/25)), 30,
+                       300, 370, "white", "center")
+        self.draw_text("Highest score: "+str(self.high_score), 30,
+                       300, 430, "white", "center")
+        self.draw_text("press SPACE to play again", 20,
+                       300, 490, "white", "center")
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running, self.playing = False, False
+                self.current_menu.run_display = False
+                # do testowania
+                pygame.QUIT()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.new_game()
+
+    def load_data(self):
+        self.dir = path.dirname(__file__)
+        with open(path.join(self.dir, self.HS_FILE), 'w') as f:
+            try:
+                self.high_score = int(f.read())
+            except:
+                self.high_score = 0
 
     def move_elements(self):
         self.bird.fall_bird()
         if(self.wall.movement <= 0 - self.wall.width):
             self.wall.new_wall(600)
         else:
-            self.wall.movement -= 4
+            self.wall.movement -= self.wall_go_var
         if(self.wall2.movement <= 0 - self.wall2.width):
             self.wall2.new_wall(600)
         else:
-            self.wall2.movement -= 4
+            self.wall2.movement -= self.wall_go_var
 
     def main_loop(self):
         while self.playing:
@@ -160,7 +200,8 @@ class MAIN_GAME():
             self.clock.tick(60)
 
     def new_game(self):
-        self.game_over()
+        self.wall_go_var = 4
+        self.play_sound = True
         self.bird = BIRD()
         self.wall = WALL(600)
         self.wall2 = WALL(940)  # 940 zeby byly rowne odstepy
