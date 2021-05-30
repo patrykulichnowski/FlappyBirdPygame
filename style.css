@@ -1,0 +1,31 @@
+body{
+    background-color: rgb(250, 99, 61);
+    color: white;
+}
+.kafelek{
+    float: left;
+    font-weight:bold;
+    /*background-color: rgb(187, 183, 183);*/
+    background-color: rgb(54, 54, 54);
+    width: 60px;
+    height: 60px;
+    margin: 2px;
+    color:black;
+    text-align: center;
+    font-size: 30px;
+    display:flex;
+    justify-content: center; 
+    align-items: center;
+}
+.plansza{
+    background-color: white;
+    height: 640px;
+    width: 640px;
+    align-items: center;
+    padding: 10px;
+    margin: auto;
+    margin-top: 200px;
+}
+.rzad{
+    clear: both;
+}
